@@ -4,7 +4,7 @@ import kotlin.system.exitProcess
 val listaHospedes = mutableListOf(
     "Carlos Villagran", "Maria Antonieta de las Nieves", "Roberto Gómez Bolaños", "Florinda Meza", "Ramón Valdés", "Rubén Aguirre", "Angelines Fernández", "Edgar Vivar", "Horácio Gómez Bolaños", "Raúl Padilla"
 )
-fun cadastrarHospedes() {
+fun cadHospedes() {
 
     while (true) {
         println("""Cadastro de Hóspedes

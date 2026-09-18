@@ -2,7 +2,7 @@ package Hotel
 
 // data class representa um objeto de dados e já fornece equals(), toString() e copy().
 // Cada objeto Hospede guarda as informações de uma pessoa cadastrada no hotel.
-data class Hospede(
+data class Hospedeq(
     val nome: String,
     // Valor padrão mantém o cadastro simples quando a idade não for informada.
     val idade: Int = 0
@@ -56,11 +56,10 @@ fun CadastroHospedesDataClass() {
         }
     }
 }
-
-private fun listarHospedes(hospedes: MutableList<Hospede>) {
+fun listarHospedes(hospedes: MutableList<Hospede>) {
 }
 
-private fun cadastrarHospede(hospedes: MutableList<Hospede>) {
+fun cadastrarHospede(hospedes: MutableList<Hospede>) {
     // Regra do exercício: no máximo 20 objetos Hospede na lista.
     if (hospedes.size == 20) {
         println("Máximo de cadastros atingido.")
@@ -81,18 +80,18 @@ private fun cadastrarHospede(hospedes: MutableList<Hospede>) {
     }
 }
 
-private fun pesquisarHospede(hospedes: List<Hospede>) {
+fun pesquisarHospede(hospedes: List<Hospede>) {
     print("Nome do hóspede: ")
     val nome = readln().trim()
     // find devolve o objeto encontrado ou null se ele não existir.
     val hospede = hospedes.find { it.nome.equals(nome, ignoreCase = true) }
 
-    println(hospede?.let { "Hóspede ${it.nome} foi encontrado." } ?: "Hóspede não encontrado.")
+    print(hospede?.let { "Hóspede ${it.nome} foi encontrado." } ?: "Hóspede não encontrado.\n")
 }
 
-private fun hospedarEmQuarto(hospedes: List<Hospede>, quartos: List<Quarto>) {
+fun hospedarEmQuarto(hospedes: List<Hospede>, quartos: List<Quarto>) {
     if (hospedes.isEmpty()) {
-        println("Cadastre um hóspede antes de escolher um quarto.")
+        print("Cadastre um hóspede antes de escolher um quarto.\n")
         return
     }
 
@@ -122,7 +121,7 @@ private fun hospedarEmQuarto(hospedes: List<Hospede>, quartos: List<Quarto>) {
     }
 }
 
-private fun liberarQuarto(quartos: List<Quarto>) {
+fun liberarQuarto(quartos: List<Quarto>) {
     print("Número do quarto a liberar: ")
     val numero = readln().toIntOrNull()
     val quarto = quartos.find { it.numero == numero }
@@ -138,7 +137,7 @@ private fun liberarQuarto(quartos: List<Quarto>) {
     }
 }
 
-private fun listarHospedesEQuartos(hospedes: List<Hospede>, quartos: List<Quarto>) {
+fun listarHospedesEQuartos(hospedes: List<Hospede>, quartos: List<Quarto>) {
     println("\nHóspedes cadastrados:")
     if (hospedes.isEmpty()) println("Nenhum hóspede cadastrado.")
     hospedes.forEachIndexed { indice, hospede -> println("${indice + 1}. ${hospede.nome}") }
