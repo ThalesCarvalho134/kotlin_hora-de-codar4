@@ -2,10 +2,10 @@ package Hotel
 
 // data class representa um objeto de dados e já fornece equals(), toString() e copy().
 // Cada objeto Hospede guarda as informações de uma pessoa cadastrada no hotel.
-data class Hospedeq(
-    val nome: String,
+data class Hospede(
+    var nome: String,
     // Valor padrão mantém o cadastro simples quando a idade não for informada.
-    val idade: Int = 0
+    var idade: Int = 0
 )
 
 // Um Quarto tem número e tipo fixos. Já o hóspede pode mudar ao ocupar ou liberar o quarto.
@@ -75,7 +75,7 @@ fun cadastrarHospede(hospedes: MutableList<Hospede>) {
         println("Hóspede já cadastrado.")
     } else {
         // Cria o objeto Hospede e o adiciona à lista.
-        hospedes.add(Hospede(nome))
+
         println("Hóspede cadastrado com sucesso.")
     }
 }

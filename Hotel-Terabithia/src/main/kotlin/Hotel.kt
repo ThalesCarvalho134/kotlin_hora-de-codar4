@@ -4,12 +4,26 @@ import kotlin.system.exitProcess
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 import java.time.format.DateTimeFormatter
+import kotlin.text.compareTo
 
 /*oque falta
     um sistema inteiro para cadastrar hospede aqui no Hotel.kt
-    exibir o mapa de quartos em grade 4x5 igual a atividade 4.2-10 pede
     criar data class pra tudo que pede na 4.2-9?
 */
+
+//para organizar depois
+val listaHospedes = mutableListOf<Hospede>()
+val listaQuartos = (1..20).map { numero ->
+    val tipo = when (numero){
+        in 1..9 -> "Standard"
+        in 10..16 -> "Executivo"
+        else ->"Luxo"
+    }
+    Quarto(numero, tipo)
+}.toMutableList()
+
+//variavel while para o menu continuar funcionando
+var rodandoMenu = true
 
 val nomeHotel =  "Grand Horizon"
 
@@ -28,20 +42,6 @@ var fatorTipo = 0.0
 var nomeHospede = ""
 var numQuarto = 0
 
-//lista mutavel de quartos livres e ocupados
-
-val quartosLivres = mutableListOf<Int>(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
-val quartosOcupados = mutableListOf<Int>()
-
-//data class da função reserva de quarto (*PARA FAZER TALVEZ, AINDA NAO ENTENDI O OUTRO PROGRAMA 'CadastroHospedesDataClass'*)
-
-//lista mutavel de hospedes
-data class Hospede(
-    var nome: String,
-    var idade: String,
-    )
-
-var hospedes = mutableListOf<Hospede>()
 var buscar = ""
 
 fun main() {
@@ -85,249 +85,243 @@ fun auth() {
 
 fun menu(){
 
-    print("\nEscolha uma opção:")
-    print("1-Reservas de Quartos\n")
-    print("2-Cadastro de Hóspedes\n")
-    print("3-Eventos\n")
-    print("4-Ar-Condicionado\n")
-    print("5-Abastecimento\n")
-    print("6-Relatórios Operacionais\n")
-    print("7-Sair\n")
+        while (rodandoMenu) {
+
+            print("\nEscolha uma opção:\n")
+            print("1-Reservas de Quartos\n")
+            print("2-Cadastro de Hóspedes\n")
+            print("3-Eventos\n")
+            print("4-Ar-Condicionado\n")
+            print("5-Abastecimento\n")
+            print("6-Relatórios Operacionais\n")
+            print("7-Sair\n")
 
 
-    // A varival escolha armazena a opção escolhida pelo usuário.
-    // uma variavel local é utilizada apenas dentro da função inicio().
-    escolhaHotel = readln().toIntOrNull()
-    when (escolhaHotel) {
-        1 -> cadastrarQuartos()
-        2 -> cadastrarHospedes()
-        3 -> eventos()
-        4 -> arCondicionado()
-        5 -> AbastecimentoDeAutomoveis()
-        6 -> CadastroHospedesDataClass()
-        7 -> sairDoHotel()
-        else -> erro()
-    }
+            // A varival escolha armazena a opção escolhida pelo usuário.
+            // uma variavel local é utilizada apenas dentro da função inicio().
+            escolhaHotel = readln().toIntOrNull()
+            when (escolhaHotel) {
+                1 -> cadastrarQuartos()
+                2 -> cadastrarHospedes()
+                3 -> eventos()
+                4 -> arCondicionado()
+                5 -> AbastecimentoDeAutomoveis()
+                6 -> CadastroHospedesDataClass()
+                7 -> sairDoHotel()
+                else -> erro()
+            }
+        }
 }
 
 fun cadastrarQuartos() {
-
     var rodandoQuartos = true
 
-
     while (rodandoQuartos) {
+        println("\n--- RESERVA DE QUARTO ---")
 
-        print("\nRESERVA\n")
-
-        print("\nInforme o valor da diária: ")
-        valor = readln().toInt()
+        print("Informe o valor da diária: R$ ")
+        valor = readln().toIntOrNull() ?: 0
 
         print("Informe a quantidade de diárias (1-30): ")
-        diasDiaria = readln().toInt()
+        diasDiaria = readln().toIntOrNull() ?: 0
 
         if (diasDiaria <= 0) {
-            print("Valor inválido $nomeUsuario\n")
-            print("Voltando para o início\n")
+            println("Valor inválido, $nomeUsuario. Voltando para o menu principal...")
             rodandoQuartos = false
-        }
-        else if (diasDiaria >= 31) {
-            print("Comando inválido $nomeUsuario\n")
-            print("Não é possível fazer uma reserva maior que 30 dias.\n")
-            print("Voltando para o início\n")
+            continue
+        } else if (diasDiaria > 30) {
+            println("Não é possível fazer uma reserva superior a 30 dias.")
+            println("Voltando para o menu principal...")
             rodandoQuartos = false
-        }
-        else if (diasDiaria >= 1 && diasDiaria <= 30) {
-
-            //nome do hóspede
-            print("Qual o nome completo do hóspede: ")
-            nomeHospede = readln()
-
-
-            //tipo de quarto
-            print("Taxa de serviço\n")
-            print("Quarto Standard: 10%\n")
-            print("Quarto Executivo: 13%\n")
-            print("Quarto Luxo: 16%\n")
-            print("Tipo de quarto (S/E/L): ")
-            val tipoQuarto = readln().uppercase()
-
-            when(tipoQuarto){
-                "S" -> {
-                    fatorTipo = 1.0
-                    print("Quarto selecionado: Quarto Standard\n")
-                    print("Escolha um quarto (1-9): ")
-                    numQuarto = readln().toInt()
-                    while (numQuarto<= 0 || numQuarto >= 10){
-                        print("Este quarto não faz parte da classe Standard\n")
-                        print("Escolha outro quarto dentro da classe Standard")
-                        numQuarto = readln().toInt()
-                    }
-                }
-                "E" -> {
-                    fatorTipo = 1.35
-                    print("Quarto selecionado: Quarto Executivo\n")
-                    print("Escolha um quarto (10-16): ")
-                    numQuarto = readln().toInt()
-                    while (numQuarto<= 9 || numQuarto >= 17){
-                        print("Este quarto não faz parte da classe Executivo\n")
-                        print("Escolha outro quarto dentro da classe Executivo")
-                        numQuarto = readln().toInt()
-                    }
-                }
-                "L" -> {
-                    fatorTipo = 1.65
-                    print("Quarto selecionado: Quarto Luxo\n")
-                    print("Escolha um quarto (17-20): ")
-                    numQuarto = readln().toInt()
-                    while (numQuarto<= 16 || numQuarto >= 21){
-                        print("Este quarto não faz parte da classe Luxo")
-                        print("Escolha outro quarto dentro da classe Luxo")
-                        numQuarto = readln().toInt()
-                    }
-                }
-            }
-
-            if (numQuarto in quartosLivres){
-                //calcular tudo
-                val subtotal = (diasDiaria * valor) * fatorTipo
-                val taxaServico = (subtotal * 10)/100
-                val totalFinal = subtotal + taxaServico
-                println("\nResumo:")
-                println("Hóspede: $nomeHospede")
-                println("Quarto: $numQuarto")
-                println("Subtotal: R$ %.2f".format(subtotal))
-                println("Taxa de serviço (10%%): R$ %.2f".format(taxaServico))
-                println("Total: R$ %.2f".format(totalFinal))
-
-            }
-
-            else if (numQuarto in quartosOcupados){
-                print("Quarto ocupado no momento, escolha outro por favor\n")
-                print("Quartos livres: ")
-                for (quarto in quartosLivres){
-                    print("Quarto $quarto\n")
-                }
-                numQuarto = readln().toInt()
-            }
-            //numero do quarto (1 a 20)
+            continue
         }
 
-        print("\n$nomeUsuario, deseja confirmar reserva(S/N): ")
-        var continuarQuarto = readln().uppercase()
+        print("Qual o nome completo do hóspede: ")
+        nomeHospede = readln().trim()
 
-        while (continuarQuarto != "S" && continuarQuarto != "N"){
-            print("Comando inválido!\n")
-            print("Digite um comando válido: ")
-            continuarQuarto = readln().uppercase()
+        // Localiza ou cria o hóspede na lista de cadastros
+        var hospedeReserva = listaHospedes.find { it.nome.equals(nomeHospede, ignoreCase = true) }
+        if (hospedeReserva == null) {
+            hospedeReserva = Hospede(nome = nomeHospede)
+            listaHospedes.add(hospedeReserva)
         }
 
-        when (continuarQuarto){
+        println("\nTipos de quarto:")
+        println("S - Standard (Multiplicador 1.0)")
+        println("E - Executivo (Multiplicador 1.35)")
+        println("L - Luxo (Multiplicador 1.65)")
+        print("Opção de quarto (S/E/L): ")
+        val tipoQuarto = readln().uppercase().trim()
+
+        val (faixaMin, faixaMax) = when (tipoQuarto) {
             "S" -> {
-                print("\nReserva efetuada com sucesso.")
-
-                //cadastrar hóspede
-
-
-                //ocupando quarto
-                quartosLivres.remove(numQuarto)
-                quartosOcupados.add(numQuarto)
+                fatorTipo = 1.0
+                Pair(1, 9)
             }
-            "N"->{
-                println("\nReserva não efetuada. Voltando para o início...")
+            "E" -> {
+                fatorTipo = 1.35
+                Pair(10, 16)
+            }
+            "L" -> {
+                fatorTipo = 1.65
+                Pair(17, 20)
+            }
+            else -> {
+                println("Tipo de quarto inválido. Cancelando reserva...")
+                rodandoQuartos = false
+                continue
             }
         }
+
+        exibirMapaQuartos()
+        print("Escolha um quarto ($faixaMin-$faixaMax): ")
+        numQuarto = readln().toIntOrNull() ?: 0
+
+        while (numQuarto !in faixaMin..faixaMax) {
+            println("Este número não faz parte do tipo de quarto selecionado.")
+            print("Escolha outro quarto ($faixaMin-$faixaMax): ")
+            numQuarto = readln().toIntOrNull() ?: 0
+        }
+
+        val quartoSelecionado = listaQuartos.find { it.numero == numQuarto }
+
+        if (quartoSelecionado == null) {
+            println("Quarto não encontrado.")
+            continue
+        }
+
+        if (quartoSelecionado.hospede != null) {
+            println("O quarto $numQuarto já está OCUPADO! Por favor, recomece a reserva e escolha outro quarto.")
+            continue
+        }
+
+        // Cálculos do valor da diária
+        val subtotal = (diasDiaria * valor) * fatorTipo
+        val taxaServico = subtotal * 0.10
+        val totalFinal = subtotal + taxaServico
+
+        println("\n--- RESUMO DA RESERVA ---")
+        println("Hóspede: ${hospedeReserva.nome}")
+        println("Quarto: $numQuarto (${quartoSelecionado.tipo})")
+        println("Diárias: $diasDiaria dia(s)")
+        println("Subtotal: R$ %.2f".format(subtotal))
+        println("Taxa de serviço (10%%): R$ %.2f".format(taxaServico))
+        println("Total Final: R$ %.2f".format(totalFinal))
+
+        print("\n$nomeUsuario, deseja confirmar a reserva? (S/N): ")
+        var continuarQuarto = readln().uppercase().trim()
+
+        while (continuarQuarto != "S" && continuarQuarto != "N") {
+            print("Opção inválida! Digite S para Sim ou N para Não: ")
+            continuarQuarto = readln().uppercase().trim()
+        }
+
+        if (continuarQuarto == "S") {
+            quartoSelecionado.hospede = hospedeReserva
+            println("\nReserva efetuada com sucesso!")
+            exibirMapaQuartos()
+        } else {
+            println("\nReserva cancelada.")
+        }
+
+        rodandoQuartos = false
     }
 }
-/* funcao de exibir quartos
+
+//funcao de exibir quartos
 fun exibirMapaQuartos() {
     println("\n--- MAPA DE QUARTOS ---")
-    for (linha in 0..3) {
-        for (coluna in 1..5) {
-            val numeroQuarto = (linha * 5) + coluna
-            val status = if (quartosLivres.contains(numeroQuarto)) "L" else "O"
+    for (i in listaQuartos.indices) {
+        val quarto = listaQuartos[i]
+        val status = if (quarto.hospede == null) "L" else "O"
+        val numeroFormatado = quarto.numero.toString().padStart(2, '0')
+        print("[ $numeroFormatado: $status ]\t")
 
-            // Formata com zero à esquerda (ex: 01, 02) para a grade ficar alinhada
-            val numeroFormatado = numeroQuarto.toString().padStart(2, '0')
-            print("[ $numeroFormatado: $status ]\t")
+        // Quebra a linha a cada 5 quartos na tela
+        if ((i + 1) % 5 == 0) {
+            println()
         }
-        println() // Quebra a linha após 5 quartos
     }
     println("-----------------------\n")
 }
-*/
+
 fun cadastrarHospedes() {
     var rodandoHospedes = true
     while (rodandoHospedes) {
-        print("\nEscolha uma opção:")
+        print("\n--- CADASTRO DE HÓSPEDES ---")
+        print("\nEscolha uma opção:\n")
         print("1-Cadastrar\n")
         print("2-Pesquisar por nome exato\n")
         print("3-Pesquisar por prefixo\n")
         print("4-Listar ordenado (A-Z)\n")
         print("5-Atualizar cadastro\n")
-        print("Remover cadastro\n")
+        print("6-Remover cadastro\n")
         print("7-Sair\n")
+        print("Opção: ")
         val escolha = readln()
 
         when (escolha) {
             "1" -> {
-                if (hospedes.size == 15) {
-                    print("Máximo de cadastros atingido\n")
+                if (listaHospedes.size == 20) {
+                    println("Máximo de cadastros atingido.")
                 } else {
                     print("Nome do hóspede: ")
-                    val hospedeNome = readln().uppercase()
+                    val hospedeNome = readln().trim()
                     print("Idade do hóspede: ")
-                    val hospedeIdade = readln()
-                    val jaExiste = hospedes.any { it.nome.equals(hospedeNome, ignoreCase = true) }
-                    if (jaExiste) {
-                        print("Hóspede já cadastrado")
+                    val hospedeIdade = readln().toIntOrNull() ?: 0
+
+                    if (hospedeNome.isBlank()) {
+                        println("O nome não pode ficar vazio.")
+                    } else if (listaHospedes.any { it.nome.equals(hospedeNome, ignoreCase = true) }) {
+                        println("Hóspede já cadastrado.")
                     } else {
                         val novoHospede = Hospede(nome = hospedeNome, idade = hospedeIdade)
-                        hospedes.add(novoHospede)
-                        print("\n|Nome: $hospedeNome\n")
-                        print("|Idade: $hospedeIdade\n")
-                        print("Operação realizada com sucesso\n")
+                        listaHospedes.add(novoHospede)
+                        println("\n|Nome: $hospedeNome")
+                        println("|Idade: $hospedeIdade")
+                        println("Operação realizada com sucesso!")
                     }
                 }
             }
 
             "2" -> {
                 print("Qual o nome do hóspede que deseja buscar: ")
-                buscar = readln().uppercase().trim()
+                buscar = readln().trim()
 
-
-                val hospedeEncontrado = hospedes.find { it.nome == buscar || it.idade == buscar }
+                val hospedeEncontrado = listaHospedes.find { it.nome.equals(buscar, ignoreCase = true) }
 
                 if (hospedeEncontrado != null) {
                     println("Hóspede encontrado!")
-                    println("Nome: ${hospedeEncontrado.nome}")
-                    println("Idade: ${hospedeEncontrado.idade}")
+                    println("Nome: ${hospedeEncontrado.nome} | Idade: ${hospedeEncontrado.idade}")
                 } else {
-                    print("Hóspede não encontrado!")
+                    println("Hóspede não encontrado!")
                 }
             }
 
             "3" -> {
-                print("Qual o nome do hóspede que deseja buscar: ")
-                buscar = readln().uppercase().trim()
+                print("Qual o prefixo/início do nome: ")
+                buscar = readln().trim()
 
-                val resultadoPesquisa = hospedes.filter {
+                val resultadoPesquisa = listaHospedes.filter {
                     it.nome.startsWith(buscar, ignoreCase = true)
                 }
 
                 if (resultadoPesquisa.isNotEmpty()) {
-                    print("Hóspedes ncontrados: ${resultadoPesquisa.size}\n")
+                    println("Hóspedes encontrados: ${resultadoPesquisa.size}")
                     for (hospede in resultadoPesquisa) {
-                        print("-Nome: ${hospede.nome} | Idade: ${hospede.idade}\n")
+                        println("- Nome: ${hospede.nome} | Idade: ${hospede.idade}")
                     }
+                } else {
+                    println("Nenhum hóspede encontrado com esse início.")
                 }
             }
 
             "4" -> {
-                if (hospedes.isEmpty()) {
+                if (listaHospedes.isEmpty()) {
                     println("\nNenhum hóspede cadastrado para listar.\n")
                 } else {
-                    print("\nLista de Hóspedes (A-Z)\n")
-                    val hospedesOrdenados = hospedes.sortedBy { it.nome }
+                    println("\nLista de Hóspedes (A-Z):")
+                    val hospedesOrdenados = listaHospedes.sortedBy { it.nome }
                     for (hospede in hospedesOrdenados) {
                         println("Nome: ${hospede.nome} | Idade: ${hospede.idade}")
                     }
@@ -338,73 +332,206 @@ fun cadastrarHospedes() {
                 print("Digite o nome exato do hóspede que deseja atualizar: ")
                 val nomeBusca = readln().trim()
 
-                // Busca a referência do objeto na lista
-                val hospedeEncontrado = hospedes.find { it.nome.equals(nomeBusca, ignoreCase = true) }
+                val hospedeEncontrado = listaHospedes.find { it.nome.equals(nomeBusca, ignoreCase = true) }
 
                 if (hospedeEncontrado != null) {
                     println("Hóspede encontrado: ${hospedeEncontrado.nome}, Idade atual: ${hospedeEncontrado.idade}")
+                    print("Digite a nova idade: ")
+                    val novaIdade = readln().toIntOrNull()
 
-                    print("Digite a nova idade (ou pressione Enter para manter a mesma): ")
-                    val entradaIdade = readln().trim()
-
-                    // Atualiza a idade apenas se o usuário digitou um número válido
-                    val novaIdade = entradaIdade
                     if (novaIdade != null) {
                         hospedeEncontrado.idade = novaIdade
                         println("Cadastro de ${hospedeEncontrado.nome} atualizado com sucesso!")
                     } else {
                         println("Idade inválida. A idade não foi alterada.")
                     }
-
                 } else {
                     println("Hóspede não encontrado.")
                 }
             }
 
             "6" -> {
-                print("Listando hóspedes...\n")
-                //contato é hospede, mas para não confundir coloquei contato
-                for (contato in hospedes) {
-                    println("Nome:${contato.nome} | Número: ${contato.idade}")
-                }
-                print("Lista de hóspedes encerrada\n")
-                print("Nome do hóspede que deseja remover: ")
-                val remover = readln().uppercase()
-                val hospedeEncontrado = hospedes.find { it.nome == remover || it.idade == remover }
-
-                if (hospedeEncontrado != null) {
-                    println("Contato ${hospedeEncontrado.nome} encontrado!")
-                    print("Deseja remover contato (S/N): ")
-                    var removerMesmo = readln().uppercase()
-                    while (removerMesmo != "S" && removerMesmo != "N") {
-                        println("Comando inválido")
-                        print("Por favor, digite um comando válido: ")
-                        removerMesmo = readln().uppercase()
+                if (listaHospedes.isEmpty()) {
+                    println("Nenhum hóspede cadastrado para remover.")
+                } else {
+                    println("Listando hóspedes:")
+                    for (hospede in listaHospedes) {
+                        println("Nome: ${hospede.nome} | Idade: ${hospede.idade}")
                     }
-                    when (removerMesmo) {
-                        "S" -> {
-                            hospedes.remove(hospedeEncontrado)
-                            println("Hóspede ${hospedeEncontrado.nome} removido!")
-                        }
+                    print("\nNome do hóspede que deseja remover: ")
+                    val remover = readln().trim()
+                    val hospedeEncontrado = listaHospedes.find { it.nome.equals(remover, ignoreCase = true) }
 
-                        "N" -> {
-                            println("Hóspede ${hospedeEncontrado.nome} não removido!")
+                    if (hospedeEncontrado != null) {
+                        print("Deseja mesmo remover ${hospedeEncontrado.nome}? (S/N): ")
+                        val confirmar = readln().uppercase().trim()
+                        if (confirmar == "S") {
+                            listaHospedes.remove(hospedeEncontrado)
+                            println("Hóspede removido com sucesso!")
+                        } else {
+                            println("Remoção cancelada.")
                         }
+                    } else {
+                        println("Hóspede não encontrado.")
                     }
                 }
             }
 
             "7" -> {
-                print("Saindo do programa Cadastrar Hóspedes...")
+                println("Saindo do cadastro de hóspedes...")
                 rodandoHospedes = false
             }
 
-       }
+            else -> println("Opção inválida.")
+        }
     }
 }
 
 fun eventos() {
+    // 6.1 Parte A — Capacidade e seleção de auditório
+    print("Informe o número de convidados: ")
+    val convidados = readln().toIntOrNull() ?: -1
 
+// Validação: menor que zero ou maior que 350
+    if (convidados <= 0 || convidados > 350) {
+        println("Número de convidados inválido.")
+        return // Volta para o menu principal sem fechar o sistema
+    }
+
+    println("Número de convidados válido.")
+
+    val auditorio: String
+
+    if (convidados <= 220) {
+        auditorio = "Laranja"
+        if (convidados > 150) {
+            val cadeirasAdicionais = convidados - 150
+            println("Auditório selecionado: $auditorio ($cadeirasAdicionais cadeiras adicionais)")
+        } else {
+            println("Auditório selecionado: $auditorio")
+        }
+    } else {
+        auditorio = "Colorado"
+        println("Auditório selecionado: $auditorio")
+    }
+
+    // 6.2 Parte B — Agenda e disponibilidade (com Tabela de Horários)
+
+    print("Informe o dia da semana (ex: segunda, terca, sabado): ")
+    val dia = readln().lowercase().trim()
+
+    val diasUteis = listOf("segunda", "terca", "terça", "quarta", "quinta", "sexta")
+    val fimDeSemana = listOf("sabado", "sábado", "domingo")
+
+// Exibição da Tabela Visual de Horários
+    if (dia in diasUteis) {
+        println("\n=======================================================")
+        println(" TABELA DE HORÁRIOS DISPONÍVEIS - SEGUNDA A SEXTA (07h às 23h)")
+        println("=======================================================")
+        println("[07h] [08h] [09h] [10h] [11h] [12h] [13h] [14h]")
+        println("[15h] [16h] [17h] [18h] [19h] [20h] [21h] [22h] [23h]")
+        println("=======================================================\n")
+    } else if (dia in fimDeSemana) {
+        println("\n=======================================================")
+        println(" TABELA DE HORÁRIOS DISPONÍVEIS - SÁBADO E DOMINGO (07h às 15h)")
+        println("=======================================================")
+        println("[07h] [08h] [09h] [10h] [11h] [12h] [13h] [14h] [15h]")
+        println("=======================================================\n")
+    } else {
+        println("Dia da semana inválido.")
+        return
+    }
+
+    print("Informe o horário inicial do evento (0 a 23): ")
+    val horaInicio = readln().toIntOrNull() ?: -1
+
+    print("Informe a duração do evento em horas (1 a 12): ")
+    val duracao = readln().toIntOrNull() ?: -1
+
+// Validação da Duração (1 a 12h)
+    if (duracao !in 1..12) {
+        println("Duração inválida. O evento deve durar de 1 a 12 horas.")
+        return
+    }
+
+    val horaFim = horaInicio + duracao
+
+// Validação se o horário final respeita a janela do dia
+    if (dia in diasUteis && (horaInicio < 7 || horaFim > 23)) {
+        println("Auditório indisponível. Para dias úteis, o evento deve iniciar a partir das 07h e encerrar até às 23h.")
+        return
+    } else if (dia in fimDeSemana && (horaInicio < 7 || horaFim > 15)) {
+        println("Auditório indisponível. Para fins de semana, o evento deve iniciar a partir das 07h e encerrar até às 15h.")
+        return
+    }
+
+    print("Qual o nome da empresa contratante: ")
+    val nomeEmpresa = readln().trim()
+    println("Auditório reservado para $nomeEmpresa: $dia às ${horaInicio}hs.")
+
+    // 6.3 Parte C — Equipe de garçons
+    val garconsBase = Math.ceil(convidados / 12.0).toInt()
+    val garconsReforco = duracao / 2
+    val totalGarcons = garconsBase + garconsReforco
+    val custoGarcons = totalGarcons * duracao * 10.50
+
+    println("\nSão necessários $totalGarcons garçons.")
+    println("Custo total com garçons: R$ %.2f".format(custoGarcons))
+
+    // 6.4 Parte D — Serviço de Buffet
+
+    val quantidadeCafe = convidados * 0.2
+    val custoCafe = quantidadeCafe * 0.80
+
+    val quantidadeAgua = convidados * 0.5
+    val custoAgua = quantidadeAgua * 0.40
+
+    val quantidadeSalgados = convidados * 7
+    val custoSalgados = quantidadeSalgados * 0.34
+
+    val custoBuffet = custoCafe + custoAgua + custoSalgados
+
+    println("\nO evento precisará de:")
+    println("- %.1f litros de café".format(quantidadeCafe))
+    println("- %.1f litros de água".format(quantidadeAgua))
+    println("- $quantidadeSalgados salgados")
+    println("Custo total do buffet: R$ %.2f".format(custoBuffet))
+
+    // 6.5 Parte E — Relatório e Confirmação
+    val custoTotal = custoGarcons + custoBuffet
+
+    println("\n==========================================")
+    println("          RELATÓRIO DO EVENTO             ")
+    println("==========================================")
+    println("Auditório reservado: $auditorio")
+    println("Empresa contratante: $nomeEmpresa")
+    println("Dia: $dia | Horário: ${horaInicio}h às ${horaFim}h")
+    println("Duração: ${duracao}h")
+    println("Quantidade de convidados: $convidados")
+    println("Garçons: $totalGarcons | Custo dos garçons: R$ %.2f".format(custoGarcons))
+    println("Consumo do buffet:")
+    println("  - Água: %.1f L".format(quantidadeAgua))
+    println("  - Café: %.1f L".format(quantidadeCafe))
+    println("  - Salgados: $quantidadeSalgados un")
+    println("Custo do buffet: R$ %.2f".format(custoBuffet))
+    println("------------------------------------------")
+    println("CUSTO TOTAL DO EVENTO: R$ %.2f".format(custoTotal))
+    println("==========================================")
+
+    print("\nGostaria de efetuar a reserva? (S/N): ")
+    var resposta = readln().uppercase().trim()
+
+    while (resposta != "S" && resposta != "N") {
+        println("Opção inválida. Digite S para Sim ou N para Não.")
+        print("Gostaria de efetuar a reserva? (S/N): ")
+        resposta = readln().uppercase().trim()
+    }
+
+    if (resposta == "S") {
+        println("\nReserva efetuada com sucesso.")
+    } else {
+        println("\nReserva não efetuada.")
+    }
 }
 
 fun arCondicionado(){
@@ -417,8 +544,6 @@ fun AbastecimentoDeAutomoveis() {
 
 fun erro(){
     println("Por favor, informe um número entre 1 e 7.")
-    escolhaHotel = readln().toIntOrNull()
-
 }
 
 fun sairDoHotel() {
@@ -427,6 +552,7 @@ fun sairDoHotel() {
 
     if (resposta == "S" || resposta == "SIM") {
         println("Muito obrigado e até logo $nomeUsuario!")
+        rodandoMenu = false
     } else {
         inicio()
     }
