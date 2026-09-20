@@ -1,11 +1,13 @@
 package Hotel
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 // data class representa um objeto de dados e já fornece equals(), toString() e copy().
 // Cada objeto Hospede guarda as informações de uma pessoa cadastrada no hotel.
 data class Hospede(
     var nome: String,
-    // Valor padrão mantém o cadastro simples quando a idade não for informada.
-    var idade: Int = 0
+    var idade: Int = 0,
+    val dataHoraCadastro: String = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
 )
 
 // Um Quarto tem número e tipo fixos. Já o hóspede pode mudar ao ocupar ou liberar o quarto.
@@ -75,7 +77,7 @@ fun cadastrarHospede(hospedes: MutableList<Hospede>) {
         println("Hóspede já cadastrado.")
     } else {
         // Cria o objeto Hospede e o adiciona à lista.
-
+        hospedes.add(Hospede(nome = nome))
         println("Hóspede cadastrado com sucesso.")
     }
 }
@@ -140,7 +142,9 @@ fun liberarQuarto(quartos: List<Quarto>) {
 fun listarHospedesEQuartos(hospedes: List<Hospede>, quartos: List<Quarto>) {
     println("\nHóspedes cadastrados:")
     if (hospedes.isEmpty()) println("Nenhum hóspede cadastrado.")
-    hospedes.forEachIndexed { indice, hospede -> println("${indice + 1}. ${hospede.nome}") }
+    hospedes.forEachIndexed { indice, hospede ->
+        println("${indice + 1}. ${hospede.nome} | Idade: ${hospede.idade} | Cadastro: ${hospede.dataHoraCadastro}")
+    }
 
     println("\nQuartos:")
     quartos.forEach { quarto ->

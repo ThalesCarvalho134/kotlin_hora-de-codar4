@@ -68,6 +68,7 @@ fun auth() {
 fun menu(){
     //Variáveis locais
     var escolhaHotel: Int? = null
+    var receitaEventos = 0.0
 
     //Começo do código
         while (rodandoMenu) {
@@ -88,10 +89,10 @@ fun menu(){
             when (escolhaHotel) {
                 1 -> cadastrarQuartos()
                 2 -> cadastrarHospedes()
-                3 -> eventos()
+                3 -> receitaEventos += eventos()
                 4 -> arCondicionado()
                 5 -> AbastecimentoDeAutomoveis()
-                6 -> CadastroHospedesDataClass()
+                6 -> relatoriosOperacionais(receitaEventos)
                 7 -> sairDoHotel()
                 else -> erro()
             }
@@ -113,6 +114,11 @@ fun cadastrarQuartos() {
 
         print("Informe o valor da diária: R$ ")
         valor = readln().toIntOrNull() ?: 0
+        if (valor <= 0){
+            print("Valor inválido, $nomeUsuario. Voltando para o menu principal...")
+            rodandoQuartos = false
+            continue
+        }
 
         print("Informe a quantidade de diárias (1-30): ")
         diasDiaria = readln().toIntOrNull() ?: 0
@@ -175,16 +181,23 @@ fun cadastrarQuartos() {
             numQuarto = readln().toIntOrNull() ?: 0
         }
 
-        val quartoSelecionado = listaQuartos.find { it.numero == numQuarto }
+        var quartoSelecionado = listaQuartos.find { it.numero == numQuarto }
 
-        if (quartoSelecionado == null) {
-            println("Quarto não encontrado.")
-            continue
-        }
+        // Enquanto o quarto não existir, for de outra categoria OU estiver ocupado:
+        while (quartoSelecionado == null || numQuarto !in faixaMin..faixaMax || quartoSelecionado.hospede != null) {
 
-        if (quartoSelecionado.hospede != null) {
-            println("O quarto $numQuarto já está OCUPADO! Por favor, recomece a reserva e escolha outro quarto.")
-            continue
+            if (numQuarto !in faixaMin..faixaMax) {
+                println("Número inválido para este tipo de quarto ($faixaMin-$faixaMax).")
+            } else {
+                println("O quarto $numQuarto já está OCUPADO! Por favor, escolha outro quarto.")
+            }
+
+            exibirMapaQuartos()
+            print("Escolha outro quarto ($faixaMin-$faixaMax): ")
+            numQuarto = readln().toIntOrNull() ?: 0
+
+            // ATUALIZA o quarto selecionado com o novo número digitado!
+            quartoSelecionado = listaQuartos.find { it.numero == numQuarto }
         }
 
         // Cálculos do valor da diária
@@ -258,7 +271,7 @@ fun cadastrarHospedes() {
 
         when (escolha) {
             "1" -> {
-                if (listaHospedes.size == 20) {
+                if (listaHospedes.size >= 15) {
                     println("Máximo de cadastros atingido.")
                 } else {
                     print("Nome do hóspede: ")
@@ -318,31 +331,41 @@ fun cadastrarHospedes() {
                 } else {
                     println("\nLista de Hóspedes (A-Z):")
                     val hospedesOrdenados = listaHospedes.sortedBy { it.nome }
-                    for (hospede in hospedesOrdenados) {
-                        println("Nome: ${hospede.nome} | Idade: ${hospede.idade}")
+                    hospedesOrdenados.forEachIndexed { indice, hospede ->
+                        println("${indice + 1}. ${hospede.nome} | Idade: ${hospede.idade} | Cadastro: ${hospede.dataHoraCadastro}")
                     }
+
                 }
             }
 
             "5" -> {
-                print("Digite o nome exato do hóspede que deseja atualizar: ")
-                val nomeBusca = readln().trim()
-
-                val hospedeEncontrado = listaHospedes.find { it.nome.equals(nomeBusca, ignoreCase = true) }
-
-                if (hospedeEncontrado != null) {
-                    println("Hóspede encontrado: ${hospedeEncontrado.nome}, Idade atual: ${hospedeEncontrado.idade}")
-                    print("Digite a nova idade: ")
-                    val novaIdade = readln().toIntOrNull()
-
-                    if (novaIdade != null) {
-                        hospedeEncontrado.idade = novaIdade
-                        println("Cadastro de ${hospedeEncontrado.nome} atualizado com sucesso!")
-                    } else {
-                        println("Idade inválida. A idade não foi alterada.")
-                    }
+                if (listaHospedes.isEmpty()) {
+                    println("Nenhum hóspede cadastrado para atualizar.")
                 } else {
-                    println("Hóspede não encontrado.")
+                    println("\n--- Selecione o hóspede que deseja atualizar ---")
+                    listaHospedes.forEachIndexed { indice, hospede ->
+                        println("${indice + 1} - ${hospede.nome} (Idade: ${hospede.idade})")
+                    }
+
+                    print("\nDigite o número do hóspede: ")
+                    val opcao = readln().toIntOrNull()
+
+                    if (opcao != null && opcao in 1..listaHospedes.size) {
+                        val hospedeEncontrado = listaHospedes[opcao - 1]
+                        println("Hóspede selecionado: ${hospedeEncontrado.nome}, Idade atual: ${hospedeEncontrado.idade}")
+
+                        print("Digite a nova idade: ")
+                        val novaIdade = readln().toIntOrNull()
+
+                        if (novaIdade != null && novaIdade >= 0) {
+                            hospedeEncontrado.idade = novaIdade
+                            println("Cadastro de ${hospedeEncontrado.nome} atualizado com sucesso!")
+                        } else {
+                            println("Idade inválida. A idade não foi alterada.")
+                        }
+                    } else {
+                        println("Opção inválida. Escolha um número da lista.")
+                    }
                 }
             }
 
@@ -351,16 +374,19 @@ fun cadastrarHospedes() {
                     println("Nenhum hóspede cadastrado para remover.")
                 } else {
                     println("Listando hóspedes:")
-                    for (hospede in listaHospedes) {
-                        println("Nome: ${hospede.nome} | Idade: ${hospede.idade}")
+                    listaHospedes.forEachIndexed { indice, hospede ->
+                        println("${indice + 1}. ${hospede.nome} | Idade: ${hospede.idade}")
                     }
-                    print("\nNome do hóspede que deseja remover: ")
-                    val remover = readln().trim()
-                    val hospedeEncontrado = listaHospedes.find { it.nome.equals(remover, ignoreCase = true) }
 
-                    if (hospedeEncontrado != null) {
+                    print("\nDigite o número do hóspede que deseja remover: ")
+                    val opcao = readln().toIntOrNull()
+
+                    if (opcao != null && opcao in 1..listaHospedes.size) {
+                        val hospedeEncontrado = listaHospedes[opcao - 1]
+
                         print("Deseja mesmo remover ${hospedeEncontrado.nome}? (S/N): ")
                         val confirmar = readln().uppercase().trim()
+
                         if (confirmar == "S") {
                             listaHospedes.remove(hospedeEncontrado)
                             println("Hóspede removido com sucesso!")
@@ -368,7 +394,7 @@ fun cadastrarHospedes() {
                             println("Remoção cancelada.")
                         }
                     } else {
-                        println("Hóspede não encontrado.")
+                        println("Opção inválida. Escolha um número da lista.")
                     }
                 }
             }
@@ -383,7 +409,7 @@ fun cadastrarHospedes() {
     }
 }
 
-fun eventos() {
+fun eventos(): Double {
     // 6.1 Parte A — Capacidade e seleção de auditório
     print("Informe o número de convidados: ")
     val convidados = readln().toIntOrNull() ?: -1
@@ -391,7 +417,7 @@ fun eventos() {
 // Validação: menor que zero ou maior que 350
     if (convidados <= 0 || convidados > 350) {
         println("Número de convidados inválido.")
-        return // Volta para o menu principal sem fechar o sistema
+        return 0.0 // Volta para o menu principal sem fechar o sistema
     }
 
     println("Número de convidados válido.")
@@ -435,7 +461,7 @@ fun eventos() {
         println("=======================================================\n")
     } else {
         println("Dia da semana inválido.")
-        return
+        return 0.0
     }
 
     print("Informe o horário inicial do evento (0 a 23): ")
@@ -447,7 +473,7 @@ fun eventos() {
 // Validação da Duração (1 a 12h)
     if (duracao !in 1..12) {
         println("Duração inválida. O evento deve durar de 1 a 12 horas.")
-        return
+        return 0.0
     }
 
     val horaFim = horaInicio + duracao
@@ -455,10 +481,10 @@ fun eventos() {
 // Validação se o horário final respeita a janela do dia
     if (dia in diasUteis && (horaInicio < 7 || horaFim > 23)) {
         println("Auditório indisponível. Para dias úteis, o evento deve iniciar a partir das 07h e encerrar até às 23h.")
-        return
+        return 0.0
     } else if (dia in fimDeSemana && (horaInicio < 7 || horaFim > 15)) {
         println("Auditório indisponível. Para fins de semana, o evento deve iniciar a partir das 07h e encerrar até às 15h.")
-        return
+        return 0.0
     }
 
     print("Qual o nome da empresa contratante: ")
@@ -525,49 +551,62 @@ fun eventos() {
 
     if (resposta == "S") {
         println("\nReserva efetuada com sucesso.")
+        return custoTotal
     } else {
         println("\nReserva não efetuada.")
+        return 0.0
     }
+
 }
 
 fun arCondicionado() {
     var empresaMaisBarata = ""
     var menorValor = Double.MAX_VALUE
+    var maiorValor = Double.MIN_VALUE
+    var empresaMaisCara = ""
     var continuar = true
 
     while (continuar) {
-        print("nome da empresa: ")
+        print("Nome da Empresa: ")
         val nomeEmpresa = readln()
 
-        print("valor por aparelho: ")
+        print("Valor por aparelho: ")
         val valorPorAparelho = readln().toDoubleOrNull() ?: 0.0
 
-        print("Quantidade de aparelho: ")
+        print("Quantidade de aparelhos: ")
         val qtdAparelho = readln().toIntOrNull() ?: 0
 
-        print("porcentagem do desconto: ")
+        print("Porcentagem do desconto: ")
         val porcentagemDesconto = readln().toDoubleOrNull() ?: 0.0
 
-        print("qtd para desconto: ")
+        print("Quantidade minima para desconto: ")
         val qtdMinima = readln().toIntOrNull() ?: 0
 
-        val valorCheio = qtdAparelho * valorPorAparelho
+        print("Valor do deslocamento: ")
+        val deslocamento = readln().toDoubleOrNull() ?: 0.0
 
+        val valorCheio = qtdAparelho * valorPorAparelho
         // Cálculo do valorTotal tratando o desconto e mantendo a variável acessível fora do if
         val valorTotal = if (qtdAparelho >= qtdMinima) {
             val desconto = (valorCheio * porcentagemDesconto) / 100
-            valorCheio - desconto
+            (valorCheio + deslocamento) - desconto
         } else {
-            valorCheio
+            valorCheio + deslocamento
         }
-
-        println("nome empresa: $nomeEmpresa")
-        println("valor total a pagar: R$ %.2f".format(valorTotal))
-
+        //maior valor
+        if (valorTotal > maiorValor) {
+            maiorValor = valorTotal
+            empresaMaisCara = nomeEmpresa
+        }
+        //menor valor
         if (valorTotal < menorValor) {
             menorValor = valorTotal
             empresaMaisBarata = nomeEmpresa
         }
+
+        println("|Total a pagar: R$ %.2f".format(valorTotal))
+
+
 
         print("Deseja continuar (S/N): ")
         var respostaContinuar = readln().uppercase()
@@ -584,41 +623,71 @@ fun arCondicionado() {
             "N" -> continuar = false
         }
     }
+    val diferencaPercentual = (maiorValor - menorValor) / menorValor * 100
 
     println("\n--- Resultados ---")
     println("O orçamento de menor valor é o da $empresaMaisBarata por R$ %.2f".format(menorValor))
+    println("O orçamento de maior valor é o da $empresaMaisCara por R$ %.2f".format(maiorValor))
+    println("A diferença percentual entre eles é de %.2f%%".format(diferencaPercentual))
 }
 
 fun AbastecimentoDeAutomoveis() {
-    // ler preços dos postos
-    print("leitor de preços\n")
-    print("qual o preço do alcool na WayneOil: ")
-    val alcoolWayne = readln().toDoubleOrNull() ?: 0.0
-    print("qual o preço da gasolina na WayneOil: ")
-    val gasolinaWayne = readln().toDoubleOrNull() ?: 0.0
-    print("qual o preço do alcool na StarkPetrol: ")
-    val alcoolStark = readln().toDoubleOrNull() ?: 0.0
-    print("qual o preço da gasolina na StarkPetrol: ")
-    val gasolinaStark = readln().toDoubleOrNull() ?: 0.0
+    println("\n[Abastecimento]")
 
-// Posto Wayne
-    val melhorOpcaoWayne = if (alcoolWayne <= gasolinaWayne * 0.70) alcoolWayne else gasolinaWayne
-    val melhorOpcaoWayneString = if (alcoolWayne <= gasolinaWayne * 0.70) "Álcool" else "Gasolina"
-    val totalWayne = melhorOpcaoWayne * 42
+    // Leitura dos preços
+    print("Qual o preço do álcool no Wayne Oil: R$ ")
+    val alcoolWayne = readln().replace(",", ".").toDoubleOrNull() ?: 0.0
+    print("Qual o preço da gasolina no Wayne Oil: R$ ")
+    val gasolinaWayne = readln().replace(",", ".").toDoubleOrNull() ?: 0.0
 
-// Posto Stark
-    val melhorOpcaoStark = if (alcoolStark <= gasolinaStark * 0.70) alcoolStark else gasolinaStark
-    val melhorOpcaoStarkString = if (alcoolStark <= gasolinaStark * 0.70) "Álcool" else "Gasolina"
-    val totalStark = melhorOpcaoStark * 42
+    print("Qual o preço do álcool no Stark Petrol: R$ ")
+    val alcoolStark = readln().replace(",", ".").toDoubleOrNull() ?: 0.0
+    print("Qual o preço da gasolina no Stark Petrol: R$ ")
+    val gasolinaStark = readln().replace(",", ".").toDoubleOrNull() ?: 0.0
 
-// Comparação final
+    // Regra dos 70% (Álcool só compensa se for <= 70% do preço da gasolina)
+    val opcaoWayneStr = if (alcoolWayne > 0 && alcoolWayne <= gasolinaWayne * 0.70) "Álcool" else "Gasolina"
+    val precoWayne = if (opcaoWayneStr == "Álcool") alcoolWayne else gasolinaWayne
+    val totalWayne = precoWayne * 42
+
+    val opcaoStarkStr = if (alcoolStark > 0 && alcoolStark <= gasolinaStark * 0.70) "Álcool" else "Gasolina"
+    val precoStark = if (opcaoStarkStr == "Álcool") alcoolStark else gasolinaStark
+    val totalStark = precoStark * 42
+
+    // Exibição conforme o exemplo do enunciado
+    println("\nWayne Oil: melhor opção = $opcaoWayneStr | Total (42L) = R$ %.2f".format(totalWayne))
+    println("Stark Petrol: melhor opção = $opcaoStarkStr | Total (42L) = R$ %.2f".format(totalStark))
+
+    // Recomendação Final
     if (totalWayne < totalStark) {
-        println("$nomeUsuario, é mais barato abastecer com $melhorOpcaoWayneString no posto Wayne Oil.")
-        println("Valor total: R$ %.2f".format(totalWayne))
+        println("\n$nomeUsuario, é mais barato abastecer com ${opcaoWayneStr.lowercase()} no posto Wayne Oil.")
+    } else if (totalStark < totalWayne) {
+        println("\n$nomeUsuario, é mais barato abastecer com ${opcaoStarkStr.lowercase()} no posto Stark Petrol.")
     } else {
-        println("$nomeUsuario, é mais barato abastecer com $melhorOpcaoStarkString no posto Stark Petrol.")
-        println("Valor total: R$ %.2f".format(totalStark))
+        println("\n$nomeUsuario, ambos os postos têm o mesmo valor total.")
     }
+}
+
+fun relatoriosOperacionais(receitaEventos: Double){
+    println("\n==========================================")
+    println("      RELATÓRIO OPERACIONAL DO HOTEL      ")
+    println("==========================================")
+
+    // Total de hóspedes
+    println("Total de hóspedes cadastrados: ${listaHospedes.size}")
+    if (listaHospedes.isNotEmpty()) {
+        println("\nLista de Hóspedes:")
+        listaHospedes.forEachIndexed { index, hospede ->
+            println("  ${index + 1}. $hospede")
+        }
+    } else {
+        println("Nenhum hóspede cadastrado até o momento.")
+    }
+
+    println("------------------------------------------")
+    // Receita de Eventos
+    println("Receita Total de Eventos: R$ %.2f".format(receitaEventos))
+    println("==========================================\n")
 }
 
 fun erro(){
