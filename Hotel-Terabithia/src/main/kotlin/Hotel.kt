@@ -1,48 +1,23 @@
 package Hotel
 
 import kotlin.system.exitProcess
-import java.time.LocalDateTime
-import java.time.LocalDateTime.now
-import java.time.format.DateTimeFormatter
-import kotlin.text.compareTo
 
-/*oque falta
-    um sistema inteiro para cadastrar hospede aqui no Hotel.kt
-    criar data class pra tudo que pede na 4.2-9?
-*/
-
-//para organizar depois
+// Apenas o que realmente precisa ser global:
+//Hóspedes
 val listaHospedes = mutableListOf<Hospede>()
 val listaQuartos = (1..20).map { numero ->
     val tipo = when (numero){
         in 1..9 -> "Standard"
         in 10..16 -> "Executivo"
-        else ->"Luxo"
+        else -> "Luxo"
     }
     Quarto(numero, tipo)
 }.toMutableList()
 
-//variavel while para o menu continuar funcionando
+//Variáveis usadas em mais de uma função
 var rodandoMenu = true
-
-val nomeHotel =  "Grand Horizon"
-
-//autenticação
+val nomeHotel = "Grand Horizon"
 var nomeUsuario = ""
-var senha = ""
-val senhaCorreta = "2678"
-var tentaitvas = 3
-var autenticado = false
-
-//reserva de quartos
-var escolhaHotel: Int? = null
-var valor = 0
-var diasDiaria = 0
-var fatorTipo = 0.0
-var nomeHospede = ""
-var numQuarto = 0
-
-var buscar = ""
 
 fun main() {
     inicio()
@@ -55,6 +30,13 @@ fun inicio() {
 }
 
 fun auth() {
+    //Variáveis locais
+    var senha = ""
+    val senhaCorreta = "2678"
+    var tentaitvas = 3
+    var autenticado = false
+
+    //Começo do código
     print("Digite seu nome de usuário: ")
     nomeUsuario = readln().uppercase()
 
@@ -84,7 +66,10 @@ fun auth() {
 }
 
 fun menu(){
+    //Variáveis locais
+    var escolhaHotel: Int? = null
 
+    //Começo do código
         while (rodandoMenu) {
 
             print("\nEscolha uma opção:\n")
@@ -114,8 +99,15 @@ fun menu(){
 }
 
 fun cadastrarQuartos() {
+    //Variáveis locais
+    var valor = 0
+    var diasDiaria = 0
+    var fatorTipo = 0.0
+    var nomeHospede = ""
+    var numQuarto = 0
     var rodandoQuartos = true
 
+    //Começo do código
     while (rodandoQuartos) {
         println("\n--- RESERVA DE QUARTO ---")
 
@@ -228,7 +220,7 @@ fun cadastrarQuartos() {
     }
 }
 
-//funcao de exibir quartos
+//função de exibir quartos
 fun exibirMapaQuartos() {
     println("\n--- MAPA DE QUARTOS ---")
     for (i in listaQuartos.indices) {
@@ -246,7 +238,11 @@ fun exibirMapaQuartos() {
 }
 
 fun cadastrarHospedes() {
+    //Variáveis locais
+    var buscar = ""
     var rodandoHospedes = true
+
+    //Começo do código
     while (rodandoHospedes) {
         print("\n--- CADASTRO DE HÓSPEDES ---")
         print("\nEscolha uma opção:\n")
@@ -534,12 +530,95 @@ fun eventos() {
     }
 }
 
-fun arCondicionado(){
+fun arCondicionado() {
+    var empresaMaisBarata = ""
+    var menorValor = Double.MAX_VALUE
+    var continuar = true
 
+    while (continuar) {
+        print("nome da empresa: ")
+        val nomeEmpresa = readln()
+
+        print("valor por aparelho: ")
+        val valorPorAparelho = readln().toDoubleOrNull() ?: 0.0
+
+        print("Quantidade de aparelho: ")
+        val qtdAparelho = readln().toIntOrNull() ?: 0
+
+        print("porcentagem do desconto: ")
+        val porcentagemDesconto = readln().toDoubleOrNull() ?: 0.0
+
+        print("qtd para desconto: ")
+        val qtdMinima = readln().toIntOrNull() ?: 0
+
+        val valorCheio = qtdAparelho * valorPorAparelho
+
+        // Cálculo do valorTotal tratando o desconto e mantendo a variável acessível fora do if
+        val valorTotal = if (qtdAparelho >= qtdMinima) {
+            val desconto = (valorCheio * porcentagemDesconto) / 100
+            valorCheio - desconto
+        } else {
+            valorCheio
+        }
+
+        println("nome empresa: $nomeEmpresa")
+        println("valor total a pagar: R$ %.2f".format(valorTotal))
+
+        if (valorTotal < menorValor) {
+            menorValor = valorTotal
+            empresaMaisBarata = nomeEmpresa
+        }
+
+        print("Deseja continuar (S/N): ")
+        var respostaContinuar = readln().uppercase()
+
+        // Validação da entrada S/N
+        while (respostaContinuar != "S" && respostaContinuar != "N") {
+            print("Comando invalido. Digite S ou N: ")
+            respostaContinuar = readln().uppercase()
+        }
+
+        // Atualização da variável de controle do loop
+        when (respostaContinuar) {
+            "S" -> continuar = true
+            "N" -> continuar = false
+        }
+    }
+
+    println("\n--- Resultados ---")
+    println("O orçamento de menor valor é o da $empresaMaisBarata por R$ %.2f".format(menorValor))
 }
 
 fun AbastecimentoDeAutomoveis() {
+    // ler preços dos postos
+    print("leitor de preços\n")
+    print("qual o preço do alcool na WayneOil: ")
+    val alcoolWayne = readln().toDoubleOrNull() ?: 0.0
+    print("qual o preço da gasolina na WayneOil: ")
+    val gasolinaWayne = readln().toDoubleOrNull() ?: 0.0
+    print("qual o preço do alcool na StarkPetrol: ")
+    val alcoolStark = readln().toDoubleOrNull() ?: 0.0
+    print("qual o preço da gasolina na StarkPetrol: ")
+    val gasolinaStark = readln().toDoubleOrNull() ?: 0.0
 
+// Posto Wayne
+    val melhorOpcaoWayne = if (alcoolWayne <= gasolinaWayne * 0.70) alcoolWayne else gasolinaWayne
+    val melhorOpcaoWayneString = if (alcoolWayne <= gasolinaWayne * 0.70) "Álcool" else "Gasolina"
+    val totalWayne = melhorOpcaoWayne * 42
+
+// Posto Stark
+    val melhorOpcaoStark = if (alcoolStark <= gasolinaStark * 0.70) alcoolStark else gasolinaStark
+    val melhorOpcaoStarkString = if (alcoolStark <= gasolinaStark * 0.70) "Álcool" else "Gasolina"
+    val totalStark = melhorOpcaoStark * 42
+
+// Comparação final
+    if (totalWayne < totalStark) {
+        println("$nomeUsuario, é mais barato abastecer com $melhorOpcaoWayneString no posto Wayne Oil.")
+        println("Valor total: R$ %.2f".format(totalWayne))
+    } else {
+        println("$nomeUsuario, é mais barato abastecer com $melhorOpcaoStarkString no posto Stark Petrol.")
+        println("Valor total: R$ %.2f".format(totalStark))
+    }
 }
 
 fun erro(){
@@ -554,7 +633,7 @@ fun sairDoHotel() {
         println("Muito obrigado e até logo $nomeUsuario!")
         rodandoMenu = false
     } else {
-        inicio()
+        println("Voltando ao menu principal...")
     }
 }
 
